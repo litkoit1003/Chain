@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[Ошибка 0x98T]</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="timer-container">
+        <div class="text glitch" data-text="[Ошибка 0x98T]">[Ошибка 0x98T]</div>
+        <div class="timer glitch" id="timer" data-text="00:00:00:00:000">00:00:00:00:000</div>
+    </div>
+
+    <script>
+        function updateTimer() {
+            const targetDate = new Date('2025-06-06T20:00:00+03:00');
+            
+            const now = new Date();
+
+            let diff = targetDate - now;
+            
+            if (diff <= 0) {
+                document.getElementById('timer').textContent = '00:00:00:00:000';
+                document.getElementById('timer').setAttribute('data-text', '00:00:00:00:000');
+                return;
+            }
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            diff -= days * (1000 * 60 * 60 * 24);
+            
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            diff -= hours * (1000 * 60 * 60);
+            
+            const minutes = Math.floor(diff / (1000 * 60));
+            diff -= minutes * (1000 * 60);
+            
+            const seconds = Math.floor(diff / 1000);
+            diff -= seconds * 1000;
+            
+            const milliseconds = diff;
+            
+            const formattedDays = String(days).padStart(2, '0');
+            const formattedHours = String(hours).padStart(2, '0');
+            const formattedMinutes = String(minutes).padStart(2, '0');
+            const formattedSeconds = String(seconds).padStart(2, '0');
+            const formattedMilliseconds = String(milliseconds).padStart(3, '0');
+            
+            const timerText = `${formattedDays}:${formattedHours}:${formattedMinutes}:${formattedSeconds}:${formattedMilliseconds}`;
+            document.getElementById('timer').textContent = timerText;
+            document.getElementById('timer').setAttribute('data-text', timerText);
+        }
+        
+        updateTimer();
+        setInterval(updateTimer, 1);
+
+        setInterval(() => {
+            const container = document.querySelector('.timer-container');
+            if (Math.random() > 0.7) {
+                container.style.transform = 'translate(-50%, -50%) translateX(' + (Math.random() * 10 - 5) + 'px)';
+                container.style.opacity = 0.8 + Math.random() * 0.2;
+            } else {
+                container.style.transform = 'translate(-50%, -50%)';
+                container.style.opacity = 1;
+            }
+        }, 100);
+
+        // Более интенсивное мерцание scanlines
+        setInterval(() => {
+            const scanlines = document.querySelector('.scanlines');
+            if (Math.random() > 0.85) {
+                scanlines.style.opacity = Math.random() * 0.3 + 0.1;
+                setTimeout(() => {
+                    scanlines.style.opacity = Math.random() * 0.7 + 0.3;
+                }, 30 + Math.random() * 120);
+                
+                // Добавляем случайное смещение для эффекта "дрожания"
+                if (Math.random() > 0.5) {
+                    scanlines.style.transform = 'translateY(' + (Math.random() * 6 - 3) + 'px)';
+                    setTimeout(() => {
+                        scanlines.style.transform = 'translateY(0)';
+                    }, 50 + Math.random() * 200);
+                }
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
