@@ -16,10 +16,29 @@
         <div class="text glitch" data-text='Проект "Цепь"'></div>
         <div class="timer glitch" id="timer" data-text="00:00:00:00:000">00:00:00:00:000</div>
     </div>
+    <div id="twitch-embed"></div>
 
+    <script src="https://embed.twitch.tv/embed/v1.js"></script>
     <script>
+        let twitchEmbedInitialized = false;
+        
+        function initTwitchEmbed() {
+            if (twitchEmbedInitialized) return;
+            
+            new Twitch.Embed("twitch-embed", {
+                width: "100%",
+                height: "100%",
+                channel: "litkoit1003",
+                layout: "video",
+                autoplay: true
+            });
+            
+            twitchEmbedInitialized = true;
+        }
+        
+        
         function updateTimer() {
-            const targetDate = new Date('2025-06-20T20:00:00+03:00');
+            const targetDate = new Date('2025-08-08T09:00:00+03:00');
             
             const now = new Date();
 
