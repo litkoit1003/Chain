@@ -11,12 +11,12 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <div id="twitch-embed"></div>
     <div class="scanlines"></div>
     <div class="timer-container">
         <div class="text glitch" data-text='Проект "Цепь"'></div>
         <div class="timer glitch" id="timer" data-text="00:00:00:00:000">00:00:00:00:000</div>
     </div>
-    <div id="twitch-embed"></div>
 
     <script src="https://embed.twitch.tv/embed/v1.js"></script>
     <script>
@@ -26,8 +26,8 @@
             if (twitchEmbedInitialized) return;
             
             new Twitch.Embed("twitch-embed", {
-                width: "800",
-                height: "600",
+                width: "1280",
+                height: "720",
                 channel: "litkoit1003",
                 layout: "video",
                 autoplay: true
