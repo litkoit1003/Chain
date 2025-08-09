@@ -1,119 +1,655 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-site-verification" content="nzDcGnG-I77pw4OcNYXto7OK0u3JRW3XwVeTzV6nzQw" />
-    <title>Проект "Цепь"</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <div id="twitch-embed"></div>
-    <div class="scanlines"></div>
-    <div class="timer-container">
-        <div class="text glitch" data-text='Проект "Цепь"'></div>
-        <div class="timer glitch" id="timer" data-text="00:00:00:00:000">00:00:00:00:000</div>
-    </div>
-
-    <script src="https://embed.twitch.tv/embed/v1.js"></script>
-    <script>
-        // и да мне похуй что пол сайта сделанно через неронку. Я Java кодер а не верстальшик сайтов.
-        let twitchEmbedInitialized = false;
+    <title>Проект "Цепь" - Terminal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&display=swap');
         
-        function initTwitchEmbed() {
-            if (twitchEmbedInitialized) return;
-            
-            new Twitch.Embed("twitch-embed", {
-                width: "1280",
-                height: "720",
-                channel: "litkoit1003",
-                layout: "video-with-chat",
-                autoplay: true
-            });
-            
-            twitchEmbedInitialized = true;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
+        body {
+            background: #000;
+            color: #00ff00;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            line-height: 1.2;
+            overflow: hidden;
+            cursor: none;
+        }
         
-        function updateTimer() {
-            const targetDate = new Date('2025-08-13T16:00:00+03:00');
-            
-            const now = new Date();
+        /* Boot Screen Styles */
+        .boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: #000;
+            color: #00ff00;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 20px;
+            font-size: 16px;
+        }
+        
+        .boot-text {
+            margin-bottom: 5px;
+            opacity: 0;
+            animation: typewriter 0.1s ease-in-out forwards;
+        }
+        
+        @keyframes typewriter {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .cursor {
+            display: inline-block;
+            background: #00ff00;
+            width: 10px;
+            height: 18px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        /* Main DOS Interface */
+        .dos-container {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            background: #000;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dos-header {
+            border: double 4px #00ff00;
+            padding: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .system-info {
+            border: single 1px #00ff00;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .countdown-container {
+            border: single 2px #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: rgba(0, 255, 0, 0.05);
+            flex-shrink: 0;
+        }
+        
+        .command-prompt {
+            flex: 1;
+            font-size: 16px;
+            border: single 1px #00ff00;
+            padding: 10px;
+            background: rgba(0, 255, 0, 0.02);
+            overflow-y: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .console-content {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .console-messages {
+            flex: 1;
+            overflow-y: auto;
+            max-height: none;
+        }
+        
+        .console-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .console-messages::-webkit-scrollbar-track {
+            background: #000;
+        }
+        
+        .console-messages::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border: 1px solid #00ff00;
+        }
+        
+        .dos-header {
+            border: double 4px #00ff00;
+            padding: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .dos-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .dos-subtitle {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .dos-version {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        /* Countdown in DOS style */
+        .countdown-container {
+            border: single 2px #00ff00;
+            padding: 20px;
+            margin: 20px 0;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        
+        .countdown-title {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-decoration: underline;
+        }
+        
+        .countdown-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 2px;
+        }
+        
+        .time-separator {
+            margin: 0 10px;
+            color: #ffff00;
+            animation: blink 1s infinite;
+        }
+        
+        .system-info {
+            border: single 1px #00ff00;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        .command-prompt {
+            margin-top: 20px;
+            font-size: 16px;
+            height: 200px;
+            overflow-y: auto;
+            border: single 1px #00ff00;
+            padding: 10px;
+            background: rgba(0, 255, 0, 0.02);
+        }
+        
+        .prompt-line {
+            margin-bottom: 5px;
+        }
+        
+        .prompt-cursor {
+            animation: blink 1s infinite;
+        }
+        
+        .command-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #00ff00;
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            width: 200px;
+        }
+        
+        .command-output {
+            color: #ffff00;
+            margin-left: 20px;
+        }
+        
+        .error-output {
+            color: #ff0000;
+            margin-left: 20px;
+        }
+        
+        .system-output {
+            color: #00ffff;
+            margin-left: 20px;
+        }
+        
+        /* Twitch container in DOS style */
+        .twitch-container {
+            display: none;
+            border: double 4px #00ff00;
+            padding: 10px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .twitch-container iframe {
+            border: single 2px #00ff00;
+            background: #000;
+        }
+        
+        /* Scanlines effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 0, 0.03) 2px,
+                rgba(0, 255, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        /* CRT flicker */
+        @keyframes screen-flicker {
+            0%, 100% { opacity: 1; }
+            99% { opacity: 1; }
+            99.5% { opacity: 0.98; }
+        }
+        
+        .dos-container {
+            animation: screen-flicker 0.2s infinite linear;
+        }
+        
+        /* Progress bar */
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            border: single 1px #00ff00;
+            margin: 10px 0;
+            background: #000;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #00ff00;
+            width: 0%;
+            animation: progress 3s ease-in-out;
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        
+        .status-text {
+            color: #ffff00;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .countdown-display {
+                font-size: 24px;
+                flex-wrap: wrap;
+            }
+            .dos-title {
+                font-size: 24px;
+            }
+            body {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Boot Screen -->
+    <div class="boot-screen" id="boot-screen">
+        <div id="boot-messages"></div>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <div><span class="cursor" id="boot-cursor"></span></div>
+    </div>
 
-            let diff = targetDate - now;
-            
-            if (diff <= 0) {
-                document.getElementById('timer').textContent = '00:00:00:00:000';
-                document.getElementById('timer').setAttribute('data-text', '00:00:00:00:000');
+    <!-- Main DOS Interface -->
+    <div class="dos-container" id="main-interface">
+        <div class="dos-header">
+            <div class="dos-title">┌─ Проект "Цепь" ─┐</div>
+            <div class="dos-subtitle">█ Terminal v2.1 █</div>
+            <div class="dos-version">Chain Systems</div>
+        </div>
+        
+        <div class="system-info">
+            <div>SYSTEM INFO:</div>
+            <div>Memory: 640K OK</div>
+            <div>Graphics: VGA Compatible</div>
+            <div>Network: CONNECTED</div>
+            <div>Status: <span class="status-text">READY FOR BROADCAST</span></div>
+        </div>
+        
+        <div class="countdown-container">
+            <div class="countdown-title">═══ ЭФИР ЧЕРЕЗ ═══</div>
+            <div class="countdown-display" id="countdown">
+                <span id="days">00</span><span class="time-separator">:</span>
+                <span id="hours">00</span><span class="time-separator">:</span>
+                <span id="minutes">00</span><span class="time-separator">:</span>
+                <span id="seconds">00</span><span class="time-separator">:</span>
+                <span id="milliseconds">000</span>
+            </div>
+            <div style="text-align: center; margin-top: 10px; font-size: 14px;">
+                [ДНИ:ЧАСЫ:МИНУТЫ:СЕКУНДЫ:МИЛЛИСЕКУНДЫ]
+            </div>
+        </div>
+        
+        <div class="twitch-container" id="twitch-container">
+            <div style="margin-bottom: 10px;">╔══════════════════════════════════════╗</div>
+            <div style="margin-bottom: 10px;">║          ТРАНСЛЯЦИЯ НАЧАТА           ║</div>
+            <div style="margin-bottom: 10px;">╚══════════════════════════════════════╝</div>
+            <iframe
+                src="https://player.twitch.tv/?channel=litkoit1003&parent=litkoit1003.github.io&autoplay=true&muted=false"
+                height="480"
+                width="854"
+                allowfullscreen="true">
+            </iframe>
+        </div>
+        
+        <div class="command-prompt" id="console">
+            <div class="console-messages" id="console-messages">
+                <div class="prompt-line">C:\PROJECT\CHAIN> status</div>
+                <div class="command-output">WAITING FOR BROADCAST...</div>
+                <div class="prompt-line">TARGET: 13 августа 2025, 16:00</div>
+            </div>
+            <div class="prompt-line" id="current-line">C:\PROJECT\CHAIN> <input type="text" class="command-input" id="command-input" autocomplete="off" spellcheck="false"></div>
+        </div>
+    </div>
 
-                document.getElementById('twitch-embed').style.display = 'block';
-                document.querySelector('.timer-container').style.display = 'none';
-                if (!twitchEmbedInitialized) {
-                    initTwitchEmbed();
-                }
+    <script>
+        // Boot sequence messages
+        const bootMessages = [
+            "CHAIN OS v2.1 Starting...",
+            "",
+            "Initializing system components...",
+            "Loading kernel modules... OK",
+            "Checking system memory... 640K available",
+            "Detecting hardware... VGA display found",
+            "Initializing network stack... OK",
+            "Loading broadcast module... OK",
+            "Starting countdown system... OK",
+            "",
+            "System initialization complete.",
+            "Launching PROJECT CHAIN interface..."
+        ];
+        
+        let currentMessage = 0;
+        
+        function showBootMessage() {
+            if (currentMessage < bootMessages.length) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'boot-text';
+                messageDiv.textContent = bootMessages[currentMessage];
+                document.getElementById('boot-messages').appendChild(messageDiv);
+                currentMessage++;
+                
+                // Random delay for realistic feel
+                const delay = bootMessages[currentMessage - 1] === "" ? 50 : Math.random() * 200 + 100;
+                setTimeout(showBootMessage, delay);
+            } else {
+                // Boot complete, show main interface
+                setTimeout(() => {
+                    document.getElementById('boot-screen').style.display = 'none';
+                    document.getElementById('main-interface').style.display = 'block';
+                }, 500);
+            }
+        }
+        
+        // Start boot sequence
+        setTimeout(showBootMessage, 500);
+        
+        // Countdown functionality
+        const targetDate = new Date('August 09, 2025 11:25:00').getTime();
+        
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            
+            if (distance < 0) {
+                document.querySelector('.countdown-container').style.display = 'none';
+                document.getElementById('twitch-container').style.display = 'block';
+                document.querySelector('.command-prompt .prompt-line:nth-child(2)').textContent = 'BROADCAST ACTIVE!';
                 return;
             }
             
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            diff -= days * (1000 * 60 * 60 * 24);
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            const milliseconds = Math.floor((distance % 1000));
             
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            diff -= hours * (1000 * 60 * 60);
-            
-            const minutes = Math.floor(diff / (1000 * 60));
-            diff -= minutes * (1000 * 60);
-            
-            const seconds = Math.floor(diff / 1000);
-            diff -= seconds * 1000;
-            
-            const milliseconds = diff;
-            
-            const formattedDays = String(days).padStart(2, '0');
-            const formattedHours = String(hours).padStart(2, '0');
-            const formattedMinutes = String(minutes).padStart(2, '0');
-            const formattedSeconds = String(seconds).padStart(2, '0');
-            const formattedMilliseconds = String(milliseconds).padStart(3, '0');
-            
-            const timerText = `${formattedDays}:${formattedHours}:${formattedMinutes}:${formattedSeconds}:${formattedMilliseconds}`;
-            document.getElementById('timer').textContent = timerText;
-            document.getElementById('timer').setAttribute('data-text', timerText);
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            document.getElementById('milliseconds').textContent = milliseconds.toString().padStart(3, '0');
         }
         
-        updateTimer();
-        setInterval(updateTimer, 1);
-
-        setInterval(() => {
-            const container = document.querySelector('.timer-container');
-            if (Math.random() > 0.7) {
-                container.style.transform = 'translate(-50%, -50%) translateX(' + (Math.random() * 10 - 5) + 'px)';
-                container.style.opacity = 0.8 + Math.random() * 0.2;
-            } else {
-                container.style.transform = 'translate(-50%, -50%)';
-                container.style.opacity = 1;
-            }
-        }, 100);
-
-        // Более интенсивное мерцание scanlines
-        setInterval(() => {
-            const scanlines = document.querySelector('.scanlines');
-            if (Math.random() > 0.85) {
-                scanlines.style.opacity = Math.random() * 0.3 + 0.1;
+        // Start countdown after boot
+        setTimeout(() => {
+            updateCountdown();
+            setInterval(updateCountdown, 10);
+        }, 4000);
+        
+        // Random system messages
+        const systemMessages = [
+            "System scan complete... No errors found",
+            "Network heartbeat... OK",
+            "Buffer status... Optimal",
+            "Temperature... Normal",
+            "Power level... Stable"
+        ];
+        
+        function showRandomMessage() {
+            const messages = document.querySelectorAll('.command-prompt .prompt-line');
+            const waitingLine = messages[1];
+            if (waitingLine && Math.random() < 0.3) {
+                const randomMsg = systemMessages[Math.floor(Math.random() * systemMessages.length)];
+                waitingLine.textContent = randomMsg;
                 setTimeout(() => {
-                    scanlines.style.opacity = Math.random() * 0.7 + 0.3;
-                }, 30 + Math.random() * 120);
-                
-                // Добавляем случайное смещение для эффекта "дрожания"
-                if (Math.random() > 0.5) {
-                    scanlines.style.transform = 'translateY(' + (Math.random() * 6 - 3) + 'px)';
-                    setTimeout(() => {
-                        scanlines.style.transform = 'translateY(0)';
-                    }, 50 + Math.random() * 200);
-                }
+                    waitingLine.textContent = 'WAITING FOR BROADCAST...';
+                }, 2000);
             }
-        }, 2000);
+        }
+        
+        setTimeout(() => {
+            setInterval(showRandomMessage, 5000);
+        }, 4000);
+        
+        // Console functionality
+        const console = document.getElementById('console');
+        const commandInput = document.getElementById('command-input');
+        
+        const commands = {
+            'help': {
+                response: 'Доступные команды:\n  STATUS - показать статус системы\n  TIME - текущее время\n  CLEAR - очистить консоль\n  ABOUT - информация о проекте\n  MATRIX - активировать матричный режим\n  HACK - попытка взлома (шутка)\n  SYSTEM - системная информация\n  DIR - показать файлы\n  ECHO - повторить текст\n GOIDA - Без комментариев\n CHAIN - Пропуск таймера',
+                type: 'command-output'
+            },
+            'status': {
+                response: () => {
+                    const now = new Date().getTime();
+                    const distance = targetDate - now;
+                    if (distance < 0) {
+                        return 'STATUS: ТРАНСЛЯЦИЯ АКТИВНА!\nСИСТЕМА: ОНЛАЙН\nCONNECTION: ESTABLISHED';
+                    } else {
+                        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        return `STATUS: ОЖИДАНИЕ ТРАНСЛЯЦИИ\nДО ЭФИРА: ${days}д ${hours}ч ${minutes}м\nСИСТЕМА: ГОТОВА`;
+                    }
+                },
+                type: 'system-output'
+            },
+            'time': {
+                response: () => {
+                    const now = new Date();
+                    return `Текущее время: ${now.toLocaleString('ru-RU')}\nВремя до эфира: смотри счетчик выше`;
+                },
+                type: 'command-output'
+            },
+            'about': {
+                response: null,
+                action: 'rickroll'
+            },
+            'matrix': {
+                response: 'MATRIX MODE ACTIVATED...\n01001000 01100001 01100011 01101011 01101001 01101110 01100111\nВы уже в матрице! Зеленый текст - это подсказка ;)',
+                type: 'system-output'
+            },
+            'hack': {
+                response: 'Начинаю взлом...\n[████████████] 100%\nERROR: Доступ запрещен!\nНе пытайтесь взламывать систему проекта "Цепь"!',
+                type: 'error-output'
+            },
+            'system': {
+                response: 'SYSTEM INFORMATION:\nOS: CHAIN-DOS v2.1\nCPU: Intel 8086 Compatible\nRAM: 640KB\nGPU: VGA Compatible\nNETWORK: CONNECTED\nSTATUS: OPERATIONAL',
+                type: 'system-output'
+            },
+            'dir': {
+                response: 'Directory of C:\\PROJECT\\CHAIN\n\nCHAIN.EXE     45,231  13-08-25  15:45\nCONFIG.SYS       156  13-08-25  12:00\nAUTOEXEC.BAT     89  13-08-25  12:00\nTWITCH.DLL    12,456  13-08-25  14:30\n\n4 File(s)     57,932 bytes\n0 Dir(s)   1,234,567 bytes free',
+                type: 'command-output'
+            },
+		'chain': {
+		    response: 'Неа)',
+		    action: 'rickroll'
+		},
+            'clear': {
+                response: null,
+                action: 'clear'
+            },
+		'goida': {
+                response: "Объявлена ГОЙДА!!",
+                type: 'system-output'
+            }
+        };
+        
+        function addToConsole(text, className = 'prompt-line') {
+            const line = document.createElement('div');
+            line.className = className;
+            if (text.includes('\n')) {
+                const lines = text.split('\n');
+                lines.forEach((lineText, index) => {
+                    if (index > 0) {
+                        const newLine = document.createElement('div');
+                        newLine.className = className;
+                        newLine.textContent = lineText;
+                        console.appendChild(newLine);
+                    } else {
+                        line.textContent = lineText;
+                    }
+                });
+            } else {
+                line.textContent = text;
+            }
+            if (line.textContent) {
+                console.appendChild(line);
+            }
+            console.scrollTop = console.scrollHeight;
+        }
+        
+        function processCommand(cmd) {
+            const command = cmd.toLowerCase().trim();
+            const args = command.split(' ');
+            const baseCommand = args[0];
+            
+            // Add command to console
+            addToConsole(`C:\\PROJECT\\CHAIN> ${cmd}`);
+            
+            if (baseCommand === 'echo' && args.length > 1) {
+                const echoText = args.slice(1).join(' ');
+                addToConsole(echoText, 'command-output');
+            } else if (commands[baseCommand]) {
+                const commandObj = commands[baseCommand];
+                
+                if (commandObj.action === 'clear') {
+                    console.innerHTML = '';
+		    } else if (commandObj.action === 'rickroll') {
+		        window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                } else {
+                    const response = typeof commandObj.response === 'function' 
+                        ? commandObj.response() 
+                        : commandObj.response;
+                    addToConsole(response, commandObj.type);
+                }
+            } else if (command !== '') {
+                addToConsole(`'${cmd}' не является внутренней или внешней командой`, 'error-output');
+                addToConsole('Введите HELP для списка доступных команд', 'error-output');
+            }
+            
+            // Add new prompt
+            const newPrompt = document.createElement('div');
+            newPrompt.className = 'prompt-line';
+            newPrompt.id = 'current-line';
+            newPrompt.innerHTML = 'C:\\PROJECT\\CHAIN> <input type="text" class="command-input" id="command-input" autocomplete="off" spellcheck="false">';
+            console.appendChild(newPrompt);
+            
+            // Focus new input
+            const newInput = document.getElementById('command-input');
+            newInput.focus();
+            setupInputHandler();
+            
+            console.scrollTop = console.scrollHeight;
+        }
+        
+        function setupInputHandler() {
+            const input = document.getElementById('command-input');
+            if (input) {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        const command = this.value;
+                        this.remove(); // Remove input field
+                        document.getElementById('current-line').textContent = `C:\\PROJECT\\CHAIN> ${command}`;
+                        document.getElementById('current-line').id = ''; // Remove current-line id
+                        
+                        processCommand(command);
+                    }
+                });
+            }
+        }
+        
+        // Initialize console after boot
+        setTimeout(() => {
+            setupInputHandler();
+            commandInput.focus();
+        }, 4000);
+        
+        // Keep focus on input
+        document.addEventListener('click', () => {
+            const input = document.getElementById('command-input');
+            if (input) input.focus();
+        });
     </script>
 </body>
-</html>
